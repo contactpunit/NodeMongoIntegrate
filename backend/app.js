@@ -26,13 +26,4 @@ app.use((req, res, next) => {
 app.use('/products', productRoutes);
 app.use('/', authRoutes);
 
-mongodb.connect('mongodb+srv://dbuser:TdpUurGYjP3dfTOv@sonic.tsoj2.mongodb.net/shop?retryWrites=true&w=majority')
-  .then((client) => {
-    console.log('Connected');
-    client.close();
-  })
-  .catch(err => {
-    console.log(err)
-  })
-
 app.listen(3100);
