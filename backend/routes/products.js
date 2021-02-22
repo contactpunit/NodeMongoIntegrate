@@ -9,7 +9,9 @@ const router = Router();
 // Get list of products products
 router.get('/', (req, res, next) => {
   const products = []
-  db.getDb().collection('products')
+  db.getDb()
+    .db()
+    .collection('products')
     .find()
     .forEach(product => {
       product.price = product.price.toString();
@@ -42,6 +44,7 @@ router.post('', (req, res, next) => {
     image: req.body.image
   };
   db.getDb()
+    .db()
     .collection('products').insertOne(newProduct)
     .then(result => {
       console.log(result);

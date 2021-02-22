@@ -11,7 +11,7 @@ const initDb = callback => {
     }
     MongoClient.connect(mongodbUrl)
         .then(client => {
-            _db = client.db();
+            _db = client;
             callback(null, _db);
 
         })
