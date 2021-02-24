@@ -1,6 +1,7 @@
 const Router = require('express').Router;
 const mongodb = require('mongodb');
 const Decimal128 = mongodb.Decimal128;
+const objectId = mongodb.ObjectId;
 
 const db = require('../db');
 
@@ -30,8 +31,18 @@ router.get('/', (req, res, next) => {
 
 // Get single product
 router.get('/:id', (req, res, next) => {
-  const product = products.find(p => p._id === req.params.id);
-  res.json(product);
+  db.getDb()
+    .db()
+    .collection('products')
+    .findOne({ _id: new objectId(req.params.id) })
+    .then(prod => {
+      prod.price = prod.price.toString()
+      res.status(200).json(prod)
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({ message: 'An error occurred' })
+    })
 });
 
 // Add new product
@@ -62,12 +73,25 @@ router.patch('/:id', (req, res, next) => {
   const updatedProduct = {
     name: req.body.name,
     description: req.body.description,
-    price: parseFloat(req.body.price), // store this as 128bit decimal in MongoDB
+    price: Decimal128.fromString(req.body.price.toString()), // store this as 128bit decimal in MongoDB
     image: req.body.image
   };
-  console.log(updatedProduct);
-  res.status(200).json({ message: 'Product updated', productId: 'DUMMY' });
+  db.getDb()
+    .db()
+    .collection('products')
+    .updateOne({ _id: new mongodb.ObjectId(req.params.id) }, { $set: updatedProduct })
+    .then(result => {
+      res.status(200).json({
+        message: 'Product Updated',
+        productId: req.params.id
+      })
+    })
+    .catch(err => {
+      console.log(err)
+      res.status(500).json({ message: 'An error has occured.' });
+    })
 });
+
 
 // Delete a product
 // Requires logged in user
